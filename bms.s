@@ -3652,12 +3652,32 @@ loc_94F7:
 
 loc_94FE: 
         dec    a
-        jrne    _HandlePacket_ng
+        jrne    _HP_l1
         jp    _HandlePacket__58
+; ---------------------------------------------------------------------------
+_HP_l1:
+		sub a, #0x28
+        jrne    _HandlePacket_ng
+        jp    _HandlePacket__MY80
 ; ---------------------------------------------------------------------------
 
 _HandlePacket_ng: 
         jp    _HandlePacket_exit
+; ---------------------------------------------------------------------------
+_HandlePacket__MY80:
+		; custom ReadMem command. cmd=80, arg=len, payload = {wAddrLE}
+		; data_p = w[Payload]
+		ldw		x, R8
+		addw	x, #PACKET.payload
+		ldw		x, (x)
+		swapw	x	; LE->BE
+		; len=arg
+		mov		R0, R10
+		; cmd=80
+		mov		R1, #0x80
+		; arg=arg
+		mov		R2, R10
+        jp    	_HandlePacket_send_pkt25_exit
 ; ---------------------------------------------------------------------------
 
 _HandlePacket__01: ; get eep buf data
